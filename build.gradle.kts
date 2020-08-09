@@ -32,6 +32,7 @@ dependencies {
 	implementation("assistant.conversation.schema:assistant-conversation-java:1.0")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.github.kittinunf.fuel:fuel:2.2.3")
+	implementation("com.github.kittinunf.fuel:fuel-json:2.2.3")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 

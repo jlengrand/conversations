@@ -19,31 +19,37 @@ class GitHubService {
         val projectType = params[PROJECT_TYPE].toString().toLowerCase()
         val projectName = clean(params[PROJECT_NAME].toString())
 
-        val template = templates[projectType] // TODO: handle when no template found
+        if(projectType == null || projectName == null)
+            return responseCreator(handlerRequest, "We are missing a valid project name or type. Please try again.")
 
-        GithubApi.createRepository(template!!, projectName)
-
-        return responseCreator(handlerRequest, "creating new repository!")
+        val template = templates[projectType]
+        return if(template == null)
+            responseCreator(handlerRequest, "Unrecognized project type. Valid options are ${templates.keys.joinToString(",")}")
+        else {
+            val result = GithubApi.createRepository(template, projectName)
+            responseCreator(handlerRequest, result)
+        }
     }
 }
 
 class GithubApi{
 
     companion object {
-        // POST /repos/{template_owner}/{template_repo}/generate
         fun createRepository(template: Template, repoName: String) : String{
 
             val result = Fuel.post("https://api.github.com/repos/${template.owner}/${template.repo}/generate")
                     .header("Accept", "application/vnd.github.baptiste-preview+json")
-                    .header("Authorization", "token ${token}")
+                    .header("Authorization", "token $token")
                     .jsonBody("{ \"name\" : \"${repoName}\" }")
                     .also { println(it) }
-                    .response()
+                    .response().second
 
-            println("#####")
-            println(result)
-
-            return "Success"
+            return when(result.statusCode){
+                201 -> "Success! The repository with name ${unclean(repoName)} has been created!"
+                401 -> "Error with authorization. Have you already signed up for Github buddy?"
+                422 -> "Error when creating the repository. Do you already have a repository with the same name? "
+                else -> "Unknown error! Please try again later"
+            }
         }
     }
 }
@@ -56,3 +62,4 @@ val templates = mapOf<String,Template>(
 )
 
 private fun clean(value: String) : String = value.replace(" ", "_")
+private fun unclean(value: String) : String = value.replace("_", " ")
