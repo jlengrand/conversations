@@ -11,6 +11,11 @@ class FulfillmentController(private val gitHubApi: GitHubService) {
 
     private final val createRepoAction = "create_github_repository"
 
+    @GetMapping
+    fun hey(): String {
+        return "Hi!"
+    }
+
     @PostMapping("/fulfillment")
     fun fulfillment(@RequestBody handlerRequest: HandlerRequest) : HandlerResponse {
 
